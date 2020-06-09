@@ -72,6 +72,7 @@ func (s *SSHClient) forward(localConn net.Conn, remote string) {
 		_, err:= io.Copy(writer, reader)
 		if err != nil {
 			fmt.Printf("io.Copy error: %s", err)
+			return
 		}
 	}
 	go copyConn(localConn, remoteConn)
