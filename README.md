@@ -59,13 +59,17 @@ func main() {
 						d.TCPTunnel("127.0.0.1:2222", "127.0.0.1:22")
 					}
 				}(&d)
+				// ssh -R
+                                wgt.Add(1)
+                                go func(s *gssh.SSHClient) {
+                                        defer wgt.Done()
+                                        for {
+                                                d.RTCPTunnel("127.0.0.1:2222", "127.0.0.1:22")
+                                        }
+                                }(&d)
 				wgt.Wait()
 		}
 	}(&wg)
 	wg.Wait()
 }
 ```
-
-# TODO 
-
-- Implement reverse tunnel -R 

@@ -78,6 +78,41 @@ func (s *SSHClient) forward(localConn net.Conn, remote string) {
 	go copyConn(localConn, remoteConn)
 	go copyConn(remoteConn, localConn)
 }
+//-R 
+func (s *SSHClient) RTCPTunnel(remote string, local string) error {
+	serverConn = s.Client
+	listener, err := serverConn.Listen("tcp", remote)
+	if err != nil {
+		return err
+	}
+	defer listener.Close()
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			return err
+		}
+		go s.rforward(conn, local)
+	}
+}
+
+func (s *SSHClient) rforward(remoteConn net.Conn, local string) {
+	localConn, err := net.Dial("tcp", local)
+	if err != nil {
+		fmt.Printf("Local dial error: %s\n", err)
+		return
+	}
+
+	copyConn:=func(writer, reader net.Conn) {
+		_, err:= io.Copy(writer, reader)
+		if err != nil {
+			fmt.Printf("io.Copy error: %s", err)
+			return
+		}
+	}
+	go copyConn(localConn, remoteConn)
+	go copyConn(remoteConn, localConn)
+}
+
 //-D
 func sshDial(ctx context.Context, a string, b string) (net.Conn, error) {
 	bb := strings.Split(b, ":")	
